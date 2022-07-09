@@ -14,7 +14,16 @@ module ErrorHandler
   #     end
   #   end
   # end
-  def handle_errors
-    yield
+
+  def handle_errors(rules)
+    rules = Array(rules)
+
+    raise ArgumentError.new("All rules must be Procs") unless rules.all?{|r| r.is_a?(Proc)}
+
+    begin
+      yield
+    rescue => e
+      raise e unless rules.any?{ |r| r.(e) }
+    end
   end
 end
